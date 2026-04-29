@@ -16,8 +16,17 @@ ADMIN_PASSCODE = "2014722"
 # Secret key for sessions (change for deployment if you like)
 SECRET_KEY = os.environ.get("TF_SECRET_KEY", "dev-secret-key-please-change")
 
+# For PythonAnywhere deployment
+if os.path.exists("/home/Optimusprime999911"):
+    # PythonAnywhere paths
+    app.config["UPLOAD_FOLDER"] = "/home/Optimusprime999911/transformers-universe/uploads"
+    DB_FILENAME = "/home/Optimusprime999911/transformers-universe/transformers.db"
+else:
+    # Local development paths
+    app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
+    DB_FILENAME = "transformers.db"
+
 app = Flask(__name__, static_folder=".", static_url_path="")
-app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 app.config["MAX_CONTENT_LENGTH"] = 8 * 1024 * 1024  # 8 MB max upload
 app.secret_key = SECRET_KEY
 
