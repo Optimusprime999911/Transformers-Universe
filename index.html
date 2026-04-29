@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Transformers Universe</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link rel="stylesheet" href="styles.css" />
+  <script src="starfield.js"></script>
+</head>
+<body>
+  <header>
+    <h1>Transformers Universe</h1>
+    <nav>
+      <a href="/">Home</a>
+      <a style="margin-left:18px; margin-right:0; float:right;" href="/admin">Admin</a>
+    </nav>
+    <!-- External links: Transformers movies and game (old place) -->
+    <div id="external-links" style="display:flex;gap:12px;justify-content:center;padding:12px 0;position:relative;z-index:1">
+      <a class="color-btn movies-btn" href="https://transformer-movies.netlify.app/dark-of-the-moon" target="_blank" rel="noopener noreferrer">Transformers — The Movies</a>
+      <a class="color-btn game-btn" href="https://transformersdodgegame.netlify.app/" target="_blank" rel="noopener noreferrer">Transformer Game</a>
+    </div>
+    <!-- search moved to top of body (below header) -->
+  </header>
+
+  <!-- Search + filters (top of body) -->
+  <div class="top-controls" style="display:flex;justify-content:center;align-items:center;gap:8px;padding:12px 0;position:relative;z-index:1;flex-wrap:wrap">
+    <div class="search-wrap">
+      <input id="search" type="search" placeholder="Search by name, description..." />
+      <select id="filterType" class="fancy-select">
+        <option value="all">All types</option>
+      </select>
+      <select id="filterCat" class="fancy-select">
+        <option value="all">All categories</option>
+      </select>
+    </div>
+    <label style="display:inline-flex;align-items:center;gap:6px">
+      <input id="favOnly" type="checkbox" />
+      <span style="margin-left:6px">Favorites only</span>
+    </label>
+  </div>
+
+  
+
+  <main>
+    <section id="list">
+      <p class="hint">Loading transformers…</p>
+    </section>
+  </main>
+
+  <footer>
+    <small>Simple demo — local SQLite. Use Admin to add/edit items.</small>
+  </footer>
+
+  <script src="app.js"></script>
+  <script>
+    // wire filter controls and initial load
+    window.addEventListener("DOMContentLoaded", () => {
+      // safe wiring (only if elements exist)
+      const search = document.getElementById("search");
+      if (search) search.addEventListener("input", applyFilters);
+
+      const ft = document.getElementById("filterType");
+      if (ft) ft.addEventListener("change", applyFilters);
+
+      const fc = document.getElementById("filterCat");
+      if (fc) fc.addEventListener("change", applyFilters);
+
+      const favOnly = document.getElementById("favOnly");
+      if (favOnly) favOnly.addEventListener("change", applyFilters);
+
+      const clr = document.getElementById("clearFilters");
+      if (clr) clr.addEventListener("click", () => {
+        if (search) search.value = "";
+        if (ft) ft.value = "all";
+        if (fc) fc.value = "all";
+        if (favOnly) favOnly.checked = false;
+        applyFilters();
+      });
+
+      loadTransformers();
+    });
+  </script>
+</body>
+</html>

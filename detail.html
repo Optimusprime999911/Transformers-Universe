@@ -1,0 +1,549 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Transformer Detail</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link rel="stylesheet" href="styles.css" />
+  <script src="/starfield.js"></script>
+  <style>
+    html {
+      background: #0d0d0d;
+    }
+    body {
+      background: transparent;
+      min-height: 100vh;
+      padding-bottom: 40px;
+      color: #e6eef7;
+      position: relative;
+      margin: 0;
+    }
+    header, main, footer, nav {
+      position: relative;
+      z-index: 1;
+    }
+    .detail-wrap { max-width: 900px; margin: 20px auto; padding: 0 16px; }
+    .detail-card {
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.04));
+      padding: 28px;
+      border-radius: 14px;
+      box-shadow: 0 6px 18px rgba(2,6,23,0.6);
+      border: 1px solid rgba(255,255,255,0.04);
+    }
+    #name {
+      font-size: 2.2rem;
+      margin: 0 0 12px 0;
+      color: #f0f9ff;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+    }
+    #desc {
+      line-height: 1.8;
+      color: #e0e7ff;
+      font-size: 1rem;
+      margin-top: 16px;
+    }
+    /* Hero image area */
+    .detail-card .hero{width:100%;height:min(360px,45vh);border-radius:12px;overflow:hidden;margin-bottom:18px;background:linear-gradient(180deg,#051126,#071028);display:flex;align-items:center;justify-content:center;color:#94a3b8;position:relative}
+    .detail-card .hero img{width:100%;height:100%;object-fit:cover;display:block}
+    /* Hero image element (used when image_url present) */
+    .hero-img{width:100%;height:min(360px,45vh);object-fit:cover;border-radius:12px;margin-bottom:18px;display:none;cursor:pointer}
+    .hero-fullscreen-btn{position:absolute;right:14px;top:14px;background:rgba(0,0,0,0.55);border:1px solid rgba(255,255,255,0.12);color:#fff;padding:10px 12px;border-radius:999px;cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;z-index:5;box-shadow:0 18px 32px rgba(0,0,0,0.35)}
+    .hero-fullscreen-btn:hover{background:rgba(255,255,255,0.14)}
+    .lightbox-wrap{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.92);opacity:0;visibility:hidden;pointer-events:none;transition:opacity 240ms ease}
+    .lightbox-wrap.show{opacity:1;visibility:visible;pointer-events:auto}
+    .lightbox-close{position:absolute;top:18px;right:18px;background:rgba(255,255,255,0.08);border:none;color:#fff;padding:10px 12px;border-radius:999px;cursor:pointer;font-size:20px;line-height:1;z-index:2;box-shadow:0 18px 36px rgba(0,0,0,0.35)}
+    .lightbox-close:hover{background:rgba(255,255,255,0.16)}
+    .in-lightbox{position:fixed;top:0;left:0;right:0;bottom:0;width:100vw!important;height:100vh!important;max-width:none!important;max-height:none!important;object-fit:cover!important;border-radius:0!important;box-shadow:none!important}
+
+    body.fullscreen-active #heroFSBtn { display: none !important; }
+    body.fullscreen-active #ratingSection { display: none !important; }
+
+    .section-divider {
+      margin: 28px 0 0 0;
+      padding-top: 24px;
+      border-top: 1px solid rgba(255,255,255,0.04);
+    }
+    .detail-card section h3 {
+      margin: 0 0 18px 0;
+      font-size: 1.3rem;
+      color: #f0f9ff;
+      font-weight: 600;
+    }
+    .rating-row {
+      display: flex;
+      gap: 16px;
+      align-items: center;
+      margin: 16px 0;
+    }
+    #starArea {
+      display: flex;
+      gap: 4px;
+    }
+    .star {
+      font-size: 28px;
+      cursor: pointer;
+      opacity: 0.35;
+      transition: opacity 180ms, transform 180ms;
+      display: inline-block;
+    }
+    .star:hover {
+      transform: scale(1.1);
+    }
+    .star.on {
+      color: #fbbf24;
+      opacity: 1;
+      text-shadow: 0 0 12px rgba(251,191,36,0.4);
+    }
+    .star.disabled {
+      cursor: not-allowed;
+      opacity: 0.5;
+    }
+    #ratingSummary {
+      color: #cbd5e1;
+      font-size: 0.95rem;
+      font-weight: 500;
+    }
+    .rating-badge {
+      background: linear-gradient(90deg, rgba(96,165,250,0.1), rgba(79,70,229,0.1));
+      padding: 8px 14px;
+      border-radius: 8px;
+      border: 1px solid rgba(96,165,250,0.2);
+      color: #60a5fa;
+      font-size: 0.9rem;
+      font-weight: 600;
+    }
+    .comment-list {
+      margin: 20px 0;
+    }
+    .comment {
+      background: rgba(255,255,255,0.01);
+      padding: 16px;
+      border-radius: 10px;
+      margin-bottom: 12px;
+      border-left: 3px solid rgba(96,165,250,0.3);
+      transition: all 180ms;
+    }
+    .comment:hover {
+      background: rgba(255,255,255,0.02);
+      border-left-color: rgba(96,165,250,0.5);
+    }
+    .comment .meta {
+      color: #cbd5e1;
+      font-size: 0.85rem;
+      margin-bottom: 8px;
+      display: flex;
+      justify-content: space-between;
+    }
+    .comment-body {
+      color: #e0e7ff;
+      line-height: 1.6;
+    }
+    .comment-form {
+      margin-top: 20px;
+      padding: 20px;
+      background: rgba(96,165,250,0.03);
+      border: 1px solid rgba(96,165,250,0.1);
+      border-radius: 12px;
+    }
+    .comment-form label {
+      display: block;
+      margin-bottom: 14px;
+    }
+    .comment-form label > div {
+      font-size: 0.9rem;
+      font-weight: 500;
+      margin-bottom: 6px;
+      color: #f0f9ff;
+    }
+    .comment-form textarea,
+    .comment-form input {
+      width: 100%;
+      padding: 11px 13px;
+      border-radius: 8px;
+      border: 1px solid rgba(255,255,255,0.06);
+      background: rgba(255,255,255,0.02);
+      color: #e0e7ff;
+      font-family: inherit;
+      font-size: 0.95rem;
+      transition: all 180ms;
+    }
+    .comment-form textarea::placeholder,
+    .comment-form input::placeholder {
+      color: #64748b;
+    }
+    .comment-form textarea:focus,
+    .comment-form input:focus {
+      outline: none;
+      border-color: rgba(96,165,250,0.3);
+      background: rgba(255,255,255,0.03);
+      box-shadow: 0 0 0 3px rgba(96,165,250,0.1);
+    }
+    .comment-form textarea {
+      min-height: 100px;
+      resize: vertical;
+    }
+    .comment-form button {
+      padding: 11px 20px;
+      border-radius: 8px;
+      border: none;
+      background: linear-gradient(90deg, var(--accent), var(--accent-2));
+      color: #001;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.95rem;
+      transition: all 180ms;
+    }
+    .comment-form button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(79,70,229,0.3);
+    }
+    .comment-form button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+    .small-muted {
+      color: #94a3b8;
+      font-size: 0.9rem;
+    }
+    .back-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 24px;
+      padding: 9px 14px;
+      background: rgba(96,165,250,0.08);
+      border: 1px solid rgba(96,165,250,0.2);
+      border-radius: 8px;
+      color: #60a5fa;
+      text-decoration: none;
+      font-size: 0.9rem;
+      font-weight: 500;
+      transition: all 180ms;
+    }
+    .back-btn:hover {
+      background: rgba(96,165,250,0.12);
+      border-color: rgba(96,165,250,0.4);
+    }
+    .rated-badge {
+      display: inline-block;
+      margin-left: 8px;
+      padding: 4px 8px;
+      background: rgba(251,191,36,0.12);
+      border-radius: 4px;
+      color: #fbbf24;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+    .empty-state {
+      padding: 20px;
+      text-align: center;
+      color: var(--muted);
+      font-style: italic;
+    }
+    /* Header improvements */
+    header {
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(0,0,0,0.12);
+      backdrop-filter: blur(5px);
+      border-bottom: 1px solid rgba(255,255,255,0.02);
+    }
+    header h1 {
+      margin: 0;
+      font-size: 1.05rem;
+      color: #f0f9ff;
+    }
+    nav a {
+      color: #cbd5e1;
+      margin-left: 14px;
+      text-decoration: none;
+      transition: color 180ms;
+    }
+    nav a:hover {
+      color: #60a5fa;
+    }
+  </style>
+  
+</head>
+<body>
+  <header>
+    <h1>Transformers Universe</h1>
+    <nav>
+      <a href="/">Home</a>
+      <a href="/admin">Admin</a>
+    </nav>
+  </header>
+  
+
+  <main class="detail-wrap">
+    <a href="/" class="back-btn">← Back</a>
+    
+    <div class="detail-card">
+      <div class="hero" id="heroPlaceholder">No image available</div>
+      <img id="heroImg" alt="" class="hero-img" />
+      <button id="heroFSBtn" class="hero-fullscreen-btn" aria-label="Open fullscreen" style="display:none">⤢</button>
+      <!-- fullscreen overlay for detail page (reuses the single hero image element) -->
+      <div id="detailLightbox" class="lightbox-wrap" aria-hidden="true">
+        <button id="detailClose" class="lightbox-close" aria-label="Close image">✕</button>
+      </div>
+      <div id="info">
+        <h2 id="name">Loading…</h2>
+        <div class="meta small-muted" id="meta"></div>
+        <p id="desc" style="margin-top:12px;line-height:1.6"></p>
+      </div>
+
+      <section id="ratingSection" style="margin-top:24px;padding-top:20px;border-top:1px solid rgba(255,255,255,0.04)">
+        <h3 style="margin-top:0">Ratings</h3>
+        <div class="rating-row">
+          <div id="starArea"></div>
+          <div id="ratingSummary" class="small-muted"></div>
+        </div>
+      </section>
+
+      <section style="margin-top:24px;padding-top:20px;border-top:1px solid rgba(255,255,255,0.04)">
+        <h3 style="margin-top:0">Comments</h3>
+        <div id="comments" class="comment-list"></div>
+
+        <form id="commentForm" class="comment-form">
+          <label style="display:block;margin-bottom:12px">
+            <div style="font-size:0.9rem;margin-bottom:6px">Name (optional)</div>
+            <input name="author" placeholder="Your name" style="margin:0">
+          </label>
+          <label style="display:block;margin-bottom:12px">
+            <div style="font-size:0.9rem;margin-bottom:6px">Comment</div>
+            <textarea name="body" required placeholder="Share your thoughts..."></textarea>
+          </label>
+          <button type="submit">Post Comment</button>
+        </form>
+      </section>
+    </div>
+  </main>
+
+  <script>
+    // parse id from path: /detail/3
+    const parts = window.location.pathname.split("/").filter(Boolean);
+    const id = parts.length >= 2 ? parts[1] : null;
+    if (!id) {
+      const mainEl = document.querySelector('main');
+      if (mainEl) mainEl.innerHTML = "<p style='padding:20px'>Invalid detail link</p>";
+    } else {
+
+    const RATINGS_KEY = "transformer_user_ratings_v1";
+
+    function escapeHtml(s){ if (!s) return ""; return s.replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[m]); }
+
+    function getUserRating() {
+      try {
+        const ratings = JSON.parse(localStorage.getItem(RATINGS_KEY)) || {};
+        return ratings[id] || null;
+      } catch (e) { return null; }
+    }
+
+    function setUserRating(rating) {
+      try {
+        const ratings = JSON.parse(localStorage.getItem(RATINGS_KEY)) || {};
+        ratings[id] = rating;
+        localStorage.setItem(RATINGS_KEY, JSON.stringify(ratings));
+      } catch (e) {}
+    }
+
+    async function loadDetail(){
+      try {
+        const data = await fetch(`/api/transformers/${id}`).then(r => {
+          if (!r.ok) throw new Error("Failed to load transformer");
+          return r.json();
+        });
+        
+        document.getElementById("name").textContent = data.name;
+        document.getElementById("meta").textContent = `${data.type || ''} ${data.type && data.category ? '•' : ''} ${data.category || ''}`;
+        document.getElementById("desc").textContent = data.description || '';
+
+        // hero image (show main image if available)
+        const heroImg = document.getElementById('heroImg');
+        const heroPlaceholder = document.getElementById('heroPlaceholder');
+        const heroBtn = document.getElementById('heroFSBtn');
+        if (data.image_url) {
+          heroImg.src = data.image_url;
+          heroImg.alt = data.name || '';
+          heroImg.style.display = 'block';
+          if (heroPlaceholder) heroPlaceholder.style.display = 'none';
+          if (heroBtn) heroBtn.style.display = 'flex';
+          heroImg.style.cursor = 'pointer';
+        } else {
+          if (heroImg) heroImg.style.display = 'none';
+          if (heroPlaceholder) heroPlaceholder.style.display = 'flex';
+          if (heroBtn) heroBtn.style.display = 'none';
+        }
+
+        // ratings summary
+        const ratings = await fetch(`/api/transformers/${id}/ratings`).then(r => r.ok ? r.json() : {count: 0, average: 0});
+        const userRating = getUserRating();
+        
+        const summaryEl = document.getElementById("ratingSummary");
+        if (ratings.count > 0) {
+          const badge = `<div class="rating-badge">${ratings.average.toFixed(1)} ★ • ${ratings.count} ${ratings.count === 1 ? 'vote' : 'votes'}</div>`;
+          summaryEl.innerHTML = badge;
+        } else {
+          summaryEl.innerHTML = '<div class="rating-badge">No ratings yet</div>';
+        }
+
+        // build stars interactive
+        const starArea = document.getElementById("starArea");
+        starArea.innerHTML = '';
+        for (let s=1;s<=5;s++){
+          const span = document.createElement("span");
+          span.className = "star";
+          span.textContent = "★";
+          span.dataset.star = s;
+          if (userRating) span.classList.add("disabled");
+          if (userRating === s) span.classList.add("on");
+          
+          span.addEventListener("mouseenter", ()=> { if (!userRating) highlightStars(s); });
+          span.addEventListener("mouseleave", ()=> { if (!userRating) highlightStars(0); });
+          span.addEventListener("click", async ()=> {
+            if (userRating) return; // already rated
+            try {
+              await fetch(`/api/transformers/${id}/ratings`, { 
+                method: "POST", 
+                headers: {"Content-Type":"application/json"}, 
+                body: JSON.stringify({ rating: s })
+              });
+              setUserRating(s);
+              await loadDetail();
+            } catch (err) {
+              alert("Failed to submit rating.");
+            }
+          });
+          starArea.appendChild(span);
+        }
+
+        if (userRating) {
+          const badge = document.createElement("span");
+          badge.className = "rated-badge";
+          badge.textContent = "✓ You rated";
+          starArea.parentElement.appendChild(badge);
+        }
+
+        // comments
+        loadComments();
+
+      } catch (err) {
+        console.error(err);
+        document.getElementById("info").innerHTML = "<p style='color:#ff9b9b'>Failed to load transformer</p>";
+      }
+    }
+
+    function highlightStars(n){
+      document.querySelectorAll(".star").forEach(el=>{
+        const val = Number(el.dataset.star);
+        if (n>0 && val <= n) el.classList.add("on"); else el.classList.remove("on");
+      });
+    }
+
+    async function loadComments(){
+      try {
+        const com = await fetch(`/api/transformers/${id}/comments`).then(r=>r.ok ? r.json() : []);
+        const list = document.getElementById("comments");
+        list.innerHTML = "";
+        if (!com.length) { 
+          list.innerHTML = '<div class="empty-state">No comments yet. Be the first to share your thoughts!</div>'; 
+          return; 
+        }
+        com.forEach(c=>{
+          const el = document.createElement("div");
+          el.className = "comment";
+          const dateStr = new Date(c.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+          el.innerHTML = `<div class="meta"><strong>${escapeHtml(c.author || "Anonymous")}</strong><span>${dateStr}</span></div><div class="comment-body">${escapeHtml(c.body)}</div>`;
+          list.appendChild(el);
+        });
+      } catch (err) {
+        console.error("Failed to load comments:", err);
+      }
+    }
+
+    document.getElementById("commentForm").addEventListener("submit", async (ev)=>{
+      ev.preventDefault();
+      const form = ev.target;
+      const btn = form.querySelector("button");
+      const author = form.author.value.trim();
+      const body = form.body.value.trim();
+      if (!body) { alert("Enter a comment"); return; }
+      
+      btn.disabled = true;
+      try {
+        await fetch(`/api/transformers/${id}/comments`, {
+          method:"POST", 
+          headers:{"Content-Type":"application/json"}, 
+          body: JSON.stringify({ author, body })
+        });
+        form.body.value = "";
+        form.author.value = "";
+        await loadComments();
+      } catch (err) {
+        alert("Failed to post comment");
+      } finally {
+        btn.disabled = false;
+      }
+    });
+
+    loadDetail();
+    }
+  </script>
+  <script>
+    // Detail-page fullscreen: move the single `#heroImg` into the overlay and back
+    (function(){
+      const btn = document.getElementById('heroFSBtn');
+      const lb = document.getElementById('detailLightbox');
+      const close = document.getElementById('detailClose');
+      const hero = document.getElementById('heroImg');
+
+      function openDetailFullscreen(){
+        if (!lb || !hero) return;
+        if (lb.classList.contains('show')) return;
+        if (!hero._origParent) { hero._origParent = hero.parentNode; hero._origNext = hero.nextSibling; }
+        lb.appendChild(hero);
+        hero.classList.add('in-lightbox');
+        lb.classList.add('show'); lb.setAttribute('aria-hidden','false');
+        document.body.classList.add('fullscreen-active');
+        document.documentElement.style.overflow = 'hidden'; document.body.style.overflow = 'hidden';
+        if (close) close.focus();
+      }
+
+      function closeDetailFullscreen(){
+        if (!lb) return;
+        lb.classList.remove('show'); lb.setAttribute('aria-hidden','true');
+        document.body.classList.remove('fullscreen-active');
+        document.documentElement.style.overflow = ''; document.body.style.overflow = '';
+        if (hero && hero._origParent) {
+          setTimeout(()=>{
+            try{ hero.classList.remove('in-lightbox'); hero._origParent.insertBefore(hero, hero._origNext); delete hero._origParent; delete hero._origNext; }catch(e){}
+          }, 260);
+        }
+      }
+
+      if (btn) btn.addEventListener('click', (e)=>{ e.stopPropagation(); openDetailFullscreen(); });
+      if (hero) hero.addEventListener('click', (e)=>{ e.stopPropagation(); openDetailFullscreen(); });
+      if (close) close.addEventListener('click', (e)=>{ e.stopPropagation(); closeDetailFullscreen(); });
+      if (lb) lb.addEventListener('click', (e)=>{ if (e.target === lb) closeDetailFullscreen(); });
+      document.addEventListener('keydown', (e)=>{ if (e.key === 'Escape') closeDetailFullscreen(); });
+
+      // preserve natural image styles outside fullscreen mode
+      const resetHeroStyle = () => {
+        if (!hero) return;
+        hero.style.width = '';
+        hero.style.height = '';
+      };
+      lb.addEventListener('transitionend', (e) => {
+        if (e.target === lb && !lb.classList.contains('show')) {
+          resetHeroStyle();
+        }
+      });
+    })();
+  </script>
+  
+</body>
+</html>

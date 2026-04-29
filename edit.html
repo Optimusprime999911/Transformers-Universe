@@ -1,0 +1,315 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Edit Transformer — Transformers Universe</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <script src="starfield.js"></script>
+  <style>
+    /* ===== Inline page-specific CSS (all design for the edit page) ===== */
+    :root{
+      --bg:#081024;
+      --card:#0b1220;
+      --muted:#94a3b8;
+      --accent:#60a5fa;
+      --accent-2:#4f46e5;
+      --text:#e6eef7;
+      --danger:#ff6b6b;
+    }
+
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    html{
+      background:#0d0d0d;
+    }
+    body{
+      margin:0;
+      font-family:Inter,Segoe UI,Roboto,Arial,sans-serif;
+      background:transparent;
+      color:var(--text);
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+      padding-bottom:40px;
+      position:relative;
+    }
+    header, main, footer, nav {
+      position: relative;
+      z-index: 1;
+    }
+
+    header{
+      padding:14px 18px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      background:rgba(0,0,0,0.12);
+      backdrop-filter: blur(4px);
+      border-bottom:1px solid rgba(255,255,255,0.02);
+    }
+    header h1{margin:0;font-size:1.02rem}
+    nav a{color:var(--muted); margin-left:12px; text-decoration:none; font-size:0.95rem}
+    nav a:hover{color:var(--accent)}
+
+    main{max-width:1000px;margin:20px auto;padding:0 16px}
+    footer{max-width:1000px;margin:28px auto;color:var(--muted);padding:0 16px;font-size:0.85rem}
+
+    /* Card */
+    .edit-card{
+      background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(0,0,0,0.04));
+      border-radius:12px;
+      padding:18px;
+      box-shadow:0 10px 26px rgba(2,6,23,0.55);
+      border:1px solid rgba(255,255,255,0.02);
+    }
+
+    .edit-header { display:flex; flex-direction:column; gap:6px; margin-bottom:14px; }
+    .edit-header h2{margin:0;font-size:1.25rem}
+    .muted{color:var(--muted);font-size:0.92rem}
+    .small-muted{color:var(--muted);font-size:0.85rem;margin-top:8px}
+
+    /* Grid layout: left = image, right = fields */
+    .form-grid{
+      display:grid;
+      grid-template-columns: 320px 1fr;
+      gap:18px;
+      align-items:start;
+    }
+    @media (max-width:900px){
+      .form-grid{grid-template-columns:1fr}
+    }
+
+    .panel{background:transparent;padding:0}
+    .image-panel{display:flex;flex-direction:column;gap:10px}
+    .fields-panel{display:flex;flex-direction:column;gap:10px}
+
+    /* Image preview */
+    .img-preview{
+      width:100%;
+      border-radius:10px;
+      min-height:200px;
+      max-height:320px;
+      background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(0,0,0,0.02));
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      border:1px solid rgba(255,255,255,0.04);
+      position:relative;
+      overflow:hidden;
+      padding:8px;
+    }
+    .img-wrap{width:100%;height:100%;display:flex;align-items:center;justify-content:center}
+    .img-wrap img{
+      max-width:100%;
+      max-height:100%;
+      object-fit:contain;
+      border-radius:8px;
+      display:block;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.4);
+      background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(0,0,0,0.02));
+    }
+    .preview-badge{
+      position:absolute;
+      right:10px; top:10px;
+      background:rgba(0,0,0,0.45);
+      padding:6px 8px; border-radius:6px;
+      font-size:0.78rem; color:var(--text);
+      border:1px solid rgba(255,255,255,0.03);
+    }
+    .no-image{color:var(--muted);padding:20px;text-align:center;font-size:0.95rem}
+
+    /* File input */
+    .file-label{display:flex;flex-direction:column;gap:8px}
+    .file-label input[type="file"]{border:1px dashed rgba(255,255,255,0.04); padding:10px; border-radius:8px; background:transparent; color:var(--text)}
+
+    /* Fields */
+    label{display:block;margin-bottom:8px}
+    input[type="text"], textarea{
+      width:100%; padding:10px; border-radius:8px; border:1px solid rgba(255,255,255,0.06); background:rgba(255,255,255,0.02); color:var(--text);
+      font-size:0.95rem;
+    }
+    textarea{min-height:110px; resize:vertical}
+    .two-col{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+
+    /* Buttons */
+    .buttons-row{display:flex;gap:10px;align-items:center;margin-top:6px}
+    .btn-primary{
+      background:linear-gradient(90deg,var(--accent),var(--accent-2));
+      color:#001; padding:10px 14px; border-radius:10px; border:none; cursor:pointer; font-weight:600;
+      box-shadow:0 6px 18px rgba(96,165,250,0.12);
+    }
+    .btn-link{color:var(--muted); text-decoration:none; padding:8px 10px; border-radius:8px}
+    .btn-danger{
+      background:transparent;border:1px solid rgba(255,255,255,0.06);color:var(--danger);padding:8px 12px;border-radius:8px;cursor:pointer;
+    }
+    .btn-danger:hover{background:rgba(255,107,107,0.06)}
+
+    .required{color:#ff7b7b; margin-left:6px; font-weight:600}
+  </style>
+</head>
+  <body>
+  <header>
+    <h1>Transformers Universe</h1>
+    <nav>
+      <a href="/">Home</a>
+      <a href="/upload">Add Transformer</a>
+    </nav>
+  </header>
+
+  <main>
+    <div class="edit-card" id="editCard">
+      <div class="edit-header">
+        <h2>Edit Transformer</h2>
+        <small class="muted">Update fields below and click <strong>Save Changes</strong>.</small>
+      </div>
+
+      <form id="editForm" method="post" enctype="multipart/form-data" class="form-grid" novalidate>
+        <!-- LEFT: image preview -->
+        <div class="panel image-panel">
+          <div id="currentImage" class="img-preview" aria-live="polite">
+            <div class="no-image">Loading…</div>
+          </div>
+
+          <label class="file-label">
+            <span style="font-size:0.95rem;color:var(--muted)">Replace Image (optional)</span>
+            <input name="image" id="imageInput" type="file" accept="image/*" />
+          </label>
+
+          <div class="small-muted">Uploading a new image replaces the old one.</div>
+        </div>
+
+        <!-- RIGHT: fields -->
+        <div class="panel fields-panel">
+          <label>
+            <div style="display:flex;align-items:center;gap:6px">
+              <span style="font-weight:600">Name</span>
+              <span class="required">*</span>
+            </div>
+            <input name="name" type="text" required />
+          </label>
+
+          <div class="two-col">
+            <label>
+              <div style="font-weight:600">Type</div>
+              <input name="type" type="text" placeholder="Autobot, Decepticon..." />
+            </label>
+
+            <label>
+              <div style="font-weight:600">Category</div>
+              <input name="category" type="text" placeholder="Warrior, Scout..." />
+            </label>
+          </div>
+
+          <label>
+            <div style="font-weight:600">Description</div>
+            <textarea name="description" rows="6" placeholder="Short description"></textarea>
+          </label>
+
+          <div class="buttons-row">
+            <button class="btn-primary" type="submit">Save Changes</button>
+            <a class="btn-link" href="/">Cancel</a>
+            <button id="deleteBtn" type="button" class="btn-danger">Delete</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </main>
+
+  <footer>
+    <small style="color:var(--muted)">Editing updates the database. Images are stored in the server uploads folder.</small>
+  </footer>
+
+  <script>
+    // JS: populate form, show preview, and handle delete
+    (function(){
+      console.log("edit.html inline design loaded");
+
+      // Grab DOM elements
+      const pathParts = window.location.pathname.split("/").filter(Boolean);
+      const id = pathParts.length >= 2 ? pathParts[1] : null;
+      const form = document.getElementById("editForm");
+      const currentImageDiv = document.getElementById("currentImage");
+      const imageInput = document.getElementById("imageInput");
+      const deleteBtn = document.getElementById("deleteBtn");
+
+      if (!id) {
+        document.getElementById("editCard").innerHTML = "<p style='padding:20px'>Invalid edit link.</p>";
+        return;
+      }
+
+      // Set form action for POST
+      form.action = `/edit/${id}`;
+
+      // Fetch transformer data
+      fetch(`/api/transformers/${id}`)
+        .then(r => {
+          if (!r.ok) throw new Error("Not found");
+          return r.json();
+        })
+        .then(data => {
+          form.name.value = data.name || "";
+          form.type.value = data.type || "";
+          form.category.value = data.category || "";
+          form.description.value = data.description || "";
+
+          if (data.image_url) {
+            currentImageDiv.innerHTML = `
+              <div class="img-wrap">
+                <img id="currentImg" src="${data.image_url}" alt="${(data.name||'')}" />
+              </div>
+            `;
+          } else {
+            currentImageDiv.innerHTML = `<div class="no-image">No image</div>`;
+          }
+        })
+        .catch(err => {
+          console.error("Failed to load transformer:", err);
+          document.getElementById("editCard").innerHTML = "<p style='padding:20px'>Transformer not found.</p>";
+        });
+
+      // Preview newly selected image (bounded & not fullscreen)
+      imageInput.addEventListener("change", (ev) => {
+        const f = ev.target.files && ev.target.files[0];
+        if (!f) return;
+        const url = URL.createObjectURL(f);
+        currentImageDiv.innerHTML = `
+          <div class="img-wrap preview-wrap">
+            <img id="previewImg" src="${url}" alt="Preview" />
+            <div class="preview-badge">Preview</div>
+          </div>
+        `;
+        const imgEl = document.getElementById("previewImg");
+        imgEl.onload = () => URL.revokeObjectURL(url);
+      });
+
+      // Delete flow using API endpoint
+      deleteBtn.addEventListener("click", async () => {
+        if (!confirm("Delete this transformer? This cannot be undone.")) return;
+        try {
+          const res = await fetch(`/api/transformers/${id}`, { method: "DELETE" });
+          if (!res.ok) {
+            const payload = await res.json().catch(()=>({}));
+            alert("Delete failed: " + (payload.error || res.statusText));
+            return;
+          }
+          // Redirect to home after delete
+          window.location.href = "/";
+        } catch (err) {
+          console.error(err);
+          alert("Delete failed");
+        }
+      });
+
+      // Optional: prevent default browser validation UI and show HTML5 required
+      form.addEventListener("submit", (e) => {
+        const name = form.name.value.trim();
+        if (!name) {
+          e.preventDefault();
+          alert("Please enter a name (required).");
+          form.name.focus();
+        }
+        // otherwise allow default submit (multipart/form-data to server)
+      });
+    })();
+  </script>
+</body>
+</html>
