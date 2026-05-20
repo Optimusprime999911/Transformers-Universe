@@ -10,11 +10,11 @@
     *{box-sizing:border-box}
     html{background:#0d0d0d}
     body{margin:0;font-family:Inter,Segoe UI,Roboto,Arial,sans-serif;background:transparent;color:var(--text);position:relative;z-index:1}
-    header{padding:14px 18px;display:flex;align-items:center;justify-content:space-between;background:var(--header-bg);backdrop-filter:blur(4px);border-bottom:1px solid var(--header-border);position:relative;z-index:2}
+    header{padding:14px 18px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;background:var(--header-bg);backdrop-filter:blur(4px);border-bottom:1px solid var(--header-border);position:relative;z-index:2}
     nav a{color:var(--muted); margin-left:12px; text-decoration:none}
     main{max-width:1100px;margin:20px auto;padding:18px;position:relative;z-index:1}
-    .top{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
-    .btn{padding:8px 12px;border-radius:8px;border:none;cursor:pointer}
+    .top{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:12px;flex-wrap:wrap;gap:12px}
+    .btn{padding:8px 12px;border-radius:8px;border:none;cursor:pointer;min-width:120px}
     .btn-add{background:linear-gradient(90deg,var(--accent),#4f46e5);color:#001}
     .btn-logout{background:transparent;color:var(--muted);border:1px solid rgba(255,255,255,0.04)}
     .btn-home{background:transparent;color:var(--muted);border:1px solid rgba(255,255,255,0.04);margin-right:8px}
@@ -22,8 +22,8 @@
     .card{background:rgba(255,255,255,0.02);padding:12px;border-radius:10px;border:1px solid rgba(255,255,255,0.02)}
     .card img{width:100%;height:140px;object-fit:cover;border-radius:6px}
     .meta{color:var(--muted);font-size:0.9rem;margin-top:6px}
-    .controls{display:flex;gap:8px;margin-top:8px}
-    .controls a, .controls button{padding:6px 8px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:var(--muted);cursor:pointer;text-decoration:none}
+    .controls{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap}
+    .controls a, .controls button{padding:6px 8px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:var(--muted);cursor:pointer;text-decoration:none;min-width:100px}
     .btn-pwd{background:transparent;color:var(--muted);border:1px solid rgba(255,255,255,0.04);margin-right:8px}
     .modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);align-items:center;justify-content:center;z-index:9999}
     .modal.show{display:flex}
@@ -39,6 +39,16 @@
     .modal-buttons .btn-cancel{background:transparent;border:1px solid rgba(255,255,255,0.04);color:var(--muted)}
     .modal-error{color:#ff6b6b;font-size:0.9rem;margin-top:10px}
     .modal-success{color:#6ee7b7;font-size:0.9rem;margin-top:10px}
+    @media (max-width:760px){
+      header{justify-content:center;align-items:stretch}
+      header > div:last-child{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;width:100%}
+      .top{flex-direction:column;align-items:stretch}
+      .top > div{width:100%}
+      .btn, .btn-home, .btn-pwd, .btn-logout{width:100%;text-align:center;}
+      .grid{grid-template-columns:1fr}
+      .controls{flex-direction:column;align-items:stretch}
+      .controls a, .controls button{width:100%;}
+    }
   </style>
 </head>
 <body>

@@ -254,6 +254,9 @@ function renderCards(items) {
         <h3 style="margin-top:10px"><a href="/detail/${item.id}" style="color:inherit;text-decoration:none">${safeName}</a></h3>
         <div class="meta">${escapeHtml(item.type || "")} ${item.type && item.category ? "•" : ""} ${escapeHtml(item.category || "")}</div>
         <p>${escapeHtml(item.description || "")}</p>
+        <div class="card-actions">
+          <button type="button" class="menu-btn" data-id="${item.id}">Actions</button>
+        </div>
       </div>
     `;
     listEl.appendChild(card);
@@ -295,6 +298,20 @@ function renderCards(items) {
         { label: "Open detail", onClick: () => { window.location.href = `/detail/${item.id}`; } }
       ]);
     });
+
+    const menuBtn = card.querySelector('.menu-btn');
+    if (menuBtn) {
+      menuBtn.addEventListener('click', (ev) => {
+        ev.stopPropagation();
+        const isFav = favs.includes(Number(item.id));
+        const rect = ev.currentTarget.getBoundingClientRect();
+        showContextMenu(rect.left, rect.bottom + 8, [
+          { label: isFav ? "Unfavorite" : "Add to favorites", onClick: () => { toggleFavorite(item.id); } },
+          { label: "Compare", onClick: () => { addToSelection(item.id); } },
+          { label: "Open detail", onClick: () => { window.location.href = `/detail/${item.id}`; } }
+        ]);
+      });
+    }
 
     // card tilt: bind mousemove and leave on card to tilt .card-inner
     const inner = card.querySelector('.card-inner');
