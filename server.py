@@ -6,8 +6,9 @@ from datetime import datetime
 from functools import wraps
 
 # ============= CONFIG =============
-UPLOAD_FOLDER = "uploads"
-DB_FILENAME = "transformers.db"
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+UPLOAD_FOLDER = os.path.join(BASE_DIR, "uploads")
+DB_FILENAME = os.path.join(BASE_DIR, "transformers.db")
 ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "gif", "webp"}
 
 # Admin passcode (exactly as requested)
@@ -19,14 +20,14 @@ SECRET_KEY = os.environ.get("TF_SECRET_KEY", "dev-secret-key-please-change")
 app = Flask(__name__, static_folder=".", static_url_path="")
 
 # For PythonAnywhere deployment
-if os.path.exists("/home/Optimusprime999911"):
+if os.path.exists("/home/transformersuniverse"):
     # PythonAnywhere paths
-    app.config["UPLOAD_FOLDER"] = "/home/Optimusprime999911/transformers-universe/uploads"
-    DB_FILENAME = "/home/Optimusprime999911/transformers-universe/transformers.db"
+    app.config["UPLOAD_FOLDER"] = "/home/transformersuniverse/Transformers-Universe/uploads"
+    DB_FILENAME = "/home/transformersuniverse/Transformers-Universe/transformers.db"
 else:
     # Local development paths
     app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
-    DB_FILENAME = "transformers.db"
+    DB_FILENAME = os.path.join(BASE_DIR, "transformers.db")
 
 app.config["MAX_CONTENT_LENGTH"] = 8 * 1024 * 1024  # 8 MB max upload
 app.secret_key = SECRET_KEY
@@ -88,7 +89,7 @@ def init_db():
 def remove_image_file(filename):
     if not filename:
         return
-    path = os.path.join(UPLOAD_FOLDER, filename)
+    path = os.path.join(app.config["UPLOAD_FOLDER"], filename)
     try:
         if os.path.exists(path):
             os.remove(path)
@@ -116,8 +117,8 @@ def get_admin_passcode():
     return ADMIN_PASSCODE  # fallback to hardcoded value
 
 # ============= INITIALIZE =============
-if not os.path.exists(UPLOAD_FOLDER):
-    os.makedirs(UPLOAD_FOLDER)
+if not os.path.exists(app.config["UPLOAD_FOLDER"]):
+    os.makedirs(app.config["UPLOAD_FOLDER"])
 
 init_db()
 
@@ -257,7 +258,7 @@ def post_comment(item_id):
 # Serve uploaded images
 @app.route("/uploads/<path:filename>")
 def uploaded_file(filename):
-    return send_from_directory(UPLOAD_FOLDER, filename)
+    return send_from_directory(app.config["UPLOAD_FOLDER"], filename)
 
 # ============= ROUTES - Admin (login + panel) =============
 @app.route("/admin/login", methods=["GET", "POST"])
@@ -342,7 +343,7 @@ def upload_transformer():
         safe_name = secure_filename(image.filename)
         timestamp = datetime.utcnow().strftime("%Y%m%d%H%M%S%f")
         image_filename = f"{timestamp}_{safe_name}"
-        image.save(os.path.join(UPLOAD_FOLDER, image_filename))
+        image.save(os.path.join(app.config["UPLOAD_FOLDER"], image_filename))
 
     conn = get_db_connection()
     conn.execute("""
@@ -394,7 +395,7 @@ def edit_transformer(item_id):
         safe_name = secure_filename(image.filename)
         timestamp = datetime.utcnow().strftime("%Y%m%d%H%M%S%f")
         image_filename = f"{timestamp}_{safe_name}"
-        image.save(os.path.join(UPLOAD_FOLDER, image_filename))
+        image.save(os.path.join(app.config["UPLOAD_FOLDER"], image_filename))
         if old_image and old_image != image_filename:
             remove_image_file(old_image)
 
